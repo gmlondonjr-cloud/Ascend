@@ -1,6 +1,6 @@
 // Procedural silhouette geometry — Gaussian skyline + mountain + rolling hills.
 
-import { clamp01, lerp, ridgeNoise } from './noise';
+import { clamp01, ridgeNoise } from './noise';
 import type { Scene } from './landscape';
 
 /** Control-point x positions across the frame (0..1) for the main mountain range. */

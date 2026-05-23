@@ -18,7 +18,7 @@ import BeginButton from './components/BeginButton';
 import { chime, prime } from './lib/audio';
 import { localDayKey } from './lib/date';
 import {
-  AppState,
+  type AppState,
   applyDailyDecay,
   completeSession,
   initialState,
