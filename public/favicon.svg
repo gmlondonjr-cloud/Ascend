@@ -1,5 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <circle cx="16" cy="16" r="15" fill="#87CEEB"/>
-  <polygon points="16,5 7,24 25,24" fill="#5D8A3C" opacity="0.85"/>
-  <polygon points="16,5 12,14 20,14" fill="white" opacity="0.7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Ascend">
+  <defs>
+    <!-- Same hand-drawn turbulence wobble used throughout the app -->
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="7" />
+      <feDisplacementMap in="SourceGraphic" scale="8" />
+    </filter>
+
+    <!-- Warm cream backdrop, lighter at top — matches App.tsx background -->
+    <radialGradient id="bg" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#f6f3eb" />
+      <stop offset="100%" stop-color="#d9d4c5" />
+    </radialGradient>
+
+    <!--
+      The A-shaped path: outer mountain triangle MINUS the inner counter.
+      Outer apex:   (512, 130)
+      Outer base:   (100, 894) → (924, 894)
+      Inner apex:   (512, 540)
+      Inner base:   (332, 894) → (692, 894)
+      Snowline:     y = 440 (the crossbar of the A)
+    -->
+    <clipPath id="a-mask">
+      <path
+        d="M 100,894 L 512,130 L 924,894 L 692,894 L 512,540 L 332,894 Z"
+        fill-rule="evenodd" />
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="1024" height="1024" fill="url(#bg)" />
+
+  <g filter="url(#rough)">
+    <!-- Mountain fills, clipped to the A shape.
+         Rock band fills below the snowline; snow band fills above. -->
+    <g clip-path="url(#a-mask)">
+      <rect x="0" y="440" width="1024" height="500" fill="#6b6056" />
+      <rect x="0" y="0"   width="1024" height="440" fill="#fafafa" />
+    </g>
+
+    <!-- Ink outline traces both outer hull and inner counter -->
+    <path
+      d="M 100,894 L 512,130 L 924,894 L 692,894 L 512,540 L 332,894 Z"
+      fill="none"
+      stroke="#2a1c12"
+      stroke-width="16"
+      stroke-linejoin="round" />
+
+    <!-- The hard snowline — a signature design element of the app.
+         Continuous because counter apex (y=540) sits below the snowline (y=440). -->
+    <line x1="350" y1="440" x2="674" y2="440"
+          stroke="#2a1c12" stroke-width="10" stroke-linecap="round" />
+  </g>
 </svg>
