@@ -26,6 +26,7 @@ import {
   timerSecondsForStreak,
 } from './lib/progression';
 import { loadState, saveState } from './lib/storage';
+import { acquireWakeLock, releaseWakeLock, installWakeLockReacquire } from './lib/wakelock';
 import { HAND_FONT, INK, SCREEN_H, SCREEN_W } from './theme';
 
 type Phase = 'idle' | 'starting' | 'running' | 'complete';
@@ -50,6 +51,15 @@ export default function App() {
     })();
   }, []);
 
+  /* ---------------------------------------------- wake lock lifecycle */
+  useEffect(() => {
+    const cleanup = installWakeLockReacquire();
+    return () => {
+      cleanup();
+      releaseWakeLock();
+    };
+  }, []);
+
   /* ---------------------------------------------- session lifecycle */
 
   const today = localDayKey();
@@ -60,6 +70,7 @@ export default function App() {
     if (completedToday) return;
     prime();
     chime({ gain: 0.45 });
+    acquireWakeLock();
     setTotal(sessionSeconds);
     setRemaining(sessionSeconds);
     setPhase('starting');
@@ -81,6 +92,7 @@ export default function App() {
       if (left <= 0) {
         window.clearInterval(id);
         chime({ gain: 0.45 });
+        releaseWakeLock();
         const todayKey = localDayKey();
         setState((prev) => {
           const next = completeSession(prev, todayKey);

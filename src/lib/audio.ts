@@ -27,10 +27,39 @@ interface ChimeOptions {
 /**
  * Bell-like singing-bowl chime: C-major triad with FM-shaped sines + a
  * detuned air-shimmer voice, low-pass filtered, exponential decay.
+ *
+ * Resilient to suspended AudioContext on iOS — if the context hasn't
+ * resumed yet, we wait for the 'running' state before scheduling so
+ * oscillators aren't scheduled relative to currentTime=0.
  */
-export function chime({ when = 0, gain = 0.35 }: ChimeOptions = {}): void {
+export function chime(opts: ChimeOptions = {}): void {
   const ac = getCtx();
   if (!ac) return;
+
+  if (ac.state === 'running') {
+    scheduleChime(ac, opts);
+    return;
+  }
+
+  // Suspended (iOS gesture race) — wait for state to flip, then schedule.
+  const onStateChange = () => {
+    if (ac.state === 'running') {
+      ac.removeEventListener('statechange', onStateChange);
+      scheduleChime(ac, opts);
+    }
+  };
+  ac.addEventListener('statechange', onStateChange);
+  // Belt-and-suspenders: nudge resume again
+  void ac.resume();
+
+  // Safety timeout — give up after 1s if the context never resumed
+  // (avoids a leaked listener if audio is hard-blocked, e.g. mute switch).
+  window.setTimeout(() => {
+    ac.removeEventListener('statechange', onStateChange);
+  }, 1000);
+}
+
+function scheduleChime(ac: CtxLike, { when = 0, gain = 0.35 }: ChimeOptions): void {
   const t0 = ac.currentTime + when;
 
   // [frequency, amplitude, decaySeconds]
